@@ -2,7 +2,6 @@
 # The function integral calculates the value of the cumulative
 # distribution function of the Gaussian distribution. Due to
 # rounding errors, we abort the computation for extreme values.
-# Mathematical details will be published an arxiv soon.
 #
 # Frank Recker, 2012
 

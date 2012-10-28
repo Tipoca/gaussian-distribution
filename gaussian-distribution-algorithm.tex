@@ -1,0 +1,174 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{hyperref}
+%
+\title{A simple algorithm for the cumulative distribution function of
+the Gaussian distribution}
+\author{Frank Recker\thanks{Frank Recker, General Reinsurance AG,
+Theodor-Heuss-Ring 11, 50668 Köln, Germany, e-mail: {\tt
+frank.recker@arcor.de}}}
+\date{\today}
+%
+\newtheorem{algorithm}{Algorithm}
+\newtheorem{lemma}[algorithm]{Lemma}
+\newtheorem{theorem}[algorithm]{Theorem}
+\newcommand\Rset{{\mathbb R}}
+\newcommand\Nset{\mathbb N}
+\newcommand\intd{{\mbox{d}}}
+%
+\begin{document}
+\maketitle
+\begin{abstract}
+\noindent We give a simple algorithm for the value of
+the cumulative distribution function of the Gaussian distribution.
+
+\noindent {\bf Key Words:} Gaussian distribution, cumulative distribution
+function, CDF
+
+\noindent {\bf MSC2010 classification:} 60-04, 68-04
+\end{abstract}
+\tableofcontents
+
+\section{Introduction}
+The Gaussian Integral
+\begin{equation}\Phi(x)=\frac{1}{\sqrt{2\pi}}\int\limits_{-\infty}^x\mbox{e}^{-\frac{t^2}{2}}\,\intd t\label{gausformel}\end{equation}
+is ubiquitous in statistical applications. There are libraries such as
+the GNU scientific library \cite{gnuscientific} which offer this
+calculation as a function. However, sometimes one cannot use these
+libraries due to technical or legal constraints. In this paper, we
+describe a simple algorithm for this calculation. Example
+implementations can be found at the github site \cite{github} of the
+author.
+
+\section{The Algorithm}
+The algorithm for computing $\phi(x,n)$ for $x\in{\mathbb R}$ and
+$n\in\Nset=\{1,2,\dots\}$ is defined as follows:
+\begin{algorithm}\label{mainalgo}
+  Let $d_n=0$ and
+  \begin{equation*}d_j=-\frac{x^2}{2j}\left(d_{j+1}
+     +\frac{1}{2j+1}\right)\end{equation*}
+  for all $j=n-1,\dots,1$. Finally let
+  \begin{equation*}\phi(x,n)=\frac{1}{2}
+     +\frac{x}{\sqrt{2\pi}}\left(d_1+1\right).\end{equation*}
+\end{algorithm}
+
+The algorithm computes an approximation of the Gaussian cumulative
+distribution function as defined in
+Equation~(\ref{gausformel}). Theorem~\ref{algotheorem} formalizes
+this.
+
+\begin{theorem}\label{algotheorem}
+Let $x\in{\mathbb R}$. Define $\Phi(x)$ as in
+Equation~(\ref{gausformel}) and $\phi(x,n)$ for all $n\in\Nset$ as in
+Algorithm~\ref{mainalgo}. Then we have
+\begin{equation*}\lim_{n\to\infty}\phi(x,n)=\Phi(x).\end{equation*}
+Furthermore if $n\ge\frac{x^2}{2}$ then
+\begin{equation*}\left|\phi(x,n)-\Phi(x)\right|<\frac{1}{\sqrt{2\pi}}\frac{|x|^{2n+1}}{(2n+1)2^nn!}.\end{equation*}
+\end{theorem}
+
+Table~\ref{somevalues} shows the values of $\phi(x,n)$ and the maximum
+error due to Theorem~\ref{algotheorem} for some~$x$ and~$n$. The
+values were calculated with the code taken from~\cite{github}. Note that
+all calculations are done with floating point numbers and hence
+rounding errors will occur.
+
+\begin{table}[ht]
+\begin{center}
+\begin{tabular}{*{3}{l|}l}
+$x$ & $n$ & $\phi(x,n)$ & error bound\\
+\hline
+$1.96$ & 1 & 1.2819268695868082 & no bound\\
+$1.96$ & 2 & 0.7812851592193613 & 0.28848977918213764\\
+$1.96$ & 10 & 0.9749960638553972 & 7.014638266104427e-6\\
+$1.96$ & 200 & 0.9750021048517796 & 1.23e-321\\
+$5$ & 1 & 2.4947114020071637 & no bound\\
+$5$ & 10 & -1169.2649270406318 & no bound\\
+$5$ & 30 & 0.9285538915764981 & 9.958422559186228e-2\\
+$5$ & 50 & 0.9999997133453642 & 4.5497179496632544e-12\\
+$5$ & 200 & 0.9999997133486902 & 1.5200212487901728e-158
+\end{tabular}
+\end{center}
+\caption{Some values and error bounds for $\phi(x,n)$\label{somevalues}}
+\end{table}
+
+\section{The Proof}\label{secproof}
+First, we derive a power series for $\Phi(x)$.
+
+\begin{lemma}
+Let $\Phi(x)$ as in Equation~(\ref{gausformel}). Then
+\begin{equation}\Phi(x)=\frac{1}{2}+\frac{1}{\sqrt{2\pi}}\sum_{k=0}^{\infty}\frac{(-1)^kx^{2k+1}}{(2k+1)2^kk!}.\label{gausformelpp}\end{equation}
+\end{lemma}
+
+\begin{proof}
+We have $\Phi(0)=\frac{1}{2}$ and hence we can rewrite
+Equation~(\ref{gausformel}) as
+\begin{equation}\Phi(x)=\frac{1}{2}+\frac{1}{\sqrt{2\pi}}\int\limits_{0}^x\mbox{e}^{-\frac{t^2}{2}}\,\intd t.\label{gausformelp}\end{equation}
+Next we use the power series for the $\exp$-function:
+\begin{eqnarray*}\mbox{e}^x=\sum_{k=0}^{\infty}\frac{x^k}{k!}.\end{eqnarray*}
+This series converges absolutely for all $x\in\Rset$. We insert this
+into Equation~(\ref{gausformelp}) and get
+\begin{equation*}\Phi(x)%
+  =\frac{1}{2}+\frac{1}{\sqrt{2\pi}}\int\limits_{0}^x\sum_{k=0}^{\infty}\frac{\left(-\frac{t^2}{2}\right)^k}{k!}\,\intd t%
+  =\frac{1}{2}+\frac{1}{\sqrt{2\pi}}\int\limits_{0}^x\sum_{k=0}^{\infty}\frac{(-1)^kt^{2k}}{2^kk!}\,\intd t%
+.\end{equation*}
+For convergent power series we can swap
+integration and summation. Hence we get
+\begin{equation*}\Phi(x)%
+  =\frac{1}{2}+\frac{1}{\sqrt{2\pi}}\sum_{k=0}^{\infty}\int\limits_{0}^x\frac{(-1)^kt^{2k}}{2^kk!}\,\intd t%
+  =\frac{1}{2}+\frac{1}{\sqrt{2\pi}}\sum_{k=0}^{\infty}\left[\frac{(-1)^kt^{2k+1}}{(2k+1)2^kk!}\right]_{t=0}^{t=x}%
+\end{equation*}
+and therefore
+\[\Phi(x)=\frac{1}{2}+\frac{1}{\sqrt{2\pi}}\sum_{k=0}^{\infty}\frac{(-1)^kx^{2k+1}}{(2k+1)2^kk!}\]
+as stated in the lemma.
+\end{proof}
+
+Next, we will show that $\phi(x,n)$ is in fact just a partial sum of
+the series given in Equation~(\ref{gausformelpp}).
+
+\begin{lemma}
+Let $x\in\Rset$, $n\in\Nset$ and $\phi(x,n)$ as defined in
+Algorithm~\ref{mainalgo}. Then we have
+\begin{equation}\phi(x,n)=\frac{1}{2}+\frac{1}{\sqrt{2\pi}}\sum_{k=0}^{n-1}\frac{(-1)^kx^{2k+1}}{(2k+1)2^kk!}.\label{phigleichung}\end{equation}
+\end{lemma}
+
+\begin{proof}
+For brevity define
+\[\phi'(x,n)=\frac{1}{2}+\frac{1}{\sqrt{2\pi}}\sum_{k=0}^{n-1}\frac{(-1)^kx^{2k+1}}{(2k+1)2^kk!}.\]
+For all $k\in\Nset$ let $a_k=\frac{1}{2k+1}$ and
+$b_k=-\frac{x^2}{2k}$. Furthermore let $a_0=1$ and
+$b_0=\frac{x}{\sqrt{2\pi}}$. Its easy to show by complete induction that
+\[\phi'(x,n)=\frac{1}{2}+\sum_{k=0}^{n-1}\left(a_k\prod_{j=0}^kb_j\right).\]
+Writing this in a Horner-scheme style gives
+\[\phi'(x,n)=\frac{1}{2}+b_0\left(a_0+b_1\left(a_1+b_2\left(\dots+b_{n-2}\left(a_{n-2}+b_{n-1}a_{n-1}\right)\dots\right)\right)\right).\]
+Algorithm~\ref{mainalgo} just evaluates this expression from the inner
+brackets to the outer one ($d_j$ is the value of the term
+$b_j(a_j+b_{j+1}(\dots))$ for all $j=1,\dots,n-2$).
+\end{proof}
+
+Now we can prove Theorem~\ref{algotheorem}.
+
+\begin{proof}[Proof of Theorem~\ref{algotheorem}]
+From Equations~(\ref{gausformelpp}) and (\ref{phigleichung}) we get
+\[\lim_{n\to\infty}\phi(x,n)=\Phi(x).\]
+The series $\phi(x,n)$ is alternating. Let $n\ge\frac{x^2}{2}$. We
+compare the terms of the series for $k=n$ and $k=n-1$:
+\[\left|\frac{\frac{(-1)^nx^{2n+1}}{(2n+1)2^nn!}}{\frac{(-1)^{n-1}x^{2n-1}}{(2n-1)2^{n-1}(n-1)!}}\right|%
+=\left|\frac{(2n-1)x^2}{(2n+1)2n}\right|\le\left|\frac{2n-1}{2n+1}\right|<1.\]
+Hence, the series for $\phi(x,n)$ is alternating and the absolute
+values of the terms are monotone decreasing. Calculus shows
+in this case that $|\phi(x,n)-\Phi(x)|$ is bound by the absolute value
+of the $n$-th term of the series which is
+\[\frac{1}{\sqrt{2\pi}}\frac{|x|^{2n+1}}{(2n+1)2^nn!}.\]
+\end{proof}
+
+\begin{thebibliography}{9}
+\bibitem{gnuscientific}The Gaussian Distribution in the GNU
+Scientific Library,
+\url{http://www.gnu.org/software/gsl/manual/html\_node/The-Gaussian-Distribution.html}
+\bibitem{github}Implementations of Algorithm~\ref{mainalgo} on github,
+\url{https://github.com/frecker/gaussian-distribution}
+\end{thebibliography}
+\end{document}
